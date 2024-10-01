@@ -2,9 +2,13 @@ import type { PrimitiveAtom, WritableAtom } from "jotai";
 import { atom } from "jotai";
 import { atomEffect } from "jotai-effect";
 
-import type { InitEffect, InitOptions, PluginModel } from "../../types.ts";
+import type {
+  TableInitEffect,
+  TableInitOptions,
+  TablePluginModel,
+} from "../../types.ts";
 
-export class SelectionPluginModel<Data> implements PluginModel<Data> {
+export class SelectionPluginModel<Data> implements TablePluginModel<Data> {
   constructor(
     private readonly options: {
       getIsActive: (item: Data) => PrimitiveAtom<boolean>;
@@ -27,7 +31,7 @@ export class SelectionPluginModel<Data> implements PluginModel<Data> {
     return this.options.$activeItems;
   }
 
-  init({ $rows, $dataMap }: InitOptions<Data>): InitEffect {
+  init({ $rows, $dataMap }: TableInitOptions<Data>): TableInitEffect {
     const $activeItemsSet = atom(new Set<string>());
 
     const mainEffect = atomEffect((get, set) => {

@@ -1,6 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai/react";
 import { atomEffect } from "jotai-effect";
-import type { PluginView } from "jotai-table";
+import type { TablePluginView } from "jotai-table";
 import { cloneElement, type ReactNode } from "react";
 
 import { DetailsPluginModel } from "./model";
@@ -9,7 +9,7 @@ export const DetailsPluginView = <Data,>({
   renderDetails,
 }: {
   renderDetails: (props: { data: Data }) => ReactNode;
-}): PluginView<Data, DetailsPluginModel<Data>> => {
+}): TablePluginView<Data, DetailsPluginModel<Data>> => {
   return {
     init: () => {
       return atomEffect(() => {});

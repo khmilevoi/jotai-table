@@ -4,7 +4,7 @@ import { useSetAtom } from "jotai/react";
 import { useAtomCallback } from "jotai/utils";
 import { atomEffect } from "jotai-effect";
 
-import type { PluginView } from "../../types.ts";
+import type { TablePluginView } from "../../types.ts";
 import { SelectionPluginModel } from "./model";
 
 export const SelectionColumnSymbol = Symbol("selection-column");
@@ -13,7 +13,7 @@ export const SelectionPluginView = <Data,>({
   getIsActive,
 }: {
   getIsActive: (item: Data) => PrimitiveAtom<boolean>;
-}): PluginView<Data, SelectionPluginModel<Data>> => ({
+}): TablePluginView<Data, SelectionPluginModel<Data>> => ({
   init: ({ $columns, model }) => {
     return atomEffect((get, set) => {
       set(

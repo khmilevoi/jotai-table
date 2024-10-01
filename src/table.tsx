@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 import { useAtom, useAtomValue, useSetAtom } from "jotai/react";
-import type { PluginModel, TableApi } from "jotai-table";
+import type { TableApi, TablePluginModel } from "jotai-table";
 import {
   createContext,
   type ReactElement,
@@ -11,7 +11,7 @@ import {
 } from "react";
 
 import { TableModel } from "./table.model";
-import type { Column, Row } from "./types.ts";
+import type { TableColumn, TableRow } from "./types.ts";
 
 export type TableProps<Data> = {
   model: TableModel<Data>;
@@ -56,10 +56,10 @@ export const Table = <Data,>({ model, data: source }: TableProps<Data>) => {
   );
 };
 
-type TableContextContract<Data> = TableApi<Data, PluginModel<Data>>;
+type TableContextContract<Data> = TableApi<Data, TablePluginModel<Data>>;
 
 const TableContext = createContext<TableContextContract<unknown>>({
-  $columns: atom<Column<unknown>[]>([]),
+  $columns: atom<TableColumn<unknown>[]>([]),
   $data: atom<unknown[]>([]),
   $dataMap: atom(new Map()),
   $rows: atom([]),
@@ -123,7 +123,7 @@ const Thead = <Data,>() => {
   );
 };
 
-const Th = <Data,>({ column }: { column: Column<Data> }) => {
+const Th = <Data,>({ column }: { column: TableColumn<Data> }) => {
   if (column._libType) {
     return null;
   }
@@ -150,8 +150,8 @@ const Tr = <Data,>({
   columns,
   row,
 }: {
-  row: Row<Data>;
-  columns: Column<Data>[];
+  row: TableRow<Data>;
+  columns: TableColumn<Data>[];
 }) => {
   const { $columns, $dataMap, $rows, plugins } = useTable<Data>();
 
@@ -185,8 +185,8 @@ const Td = <Data,>({
   row,
   column,
 }: {
-  row: Row<Data>;
-  column: Column<Data>;
+  row: TableRow<Data>;
+  column: TableColumn<Data>;
 }) => {
   const { $columns, $dataMap, $rows, plugins } = useTable<Data>();
 

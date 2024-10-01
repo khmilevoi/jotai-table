@@ -1,9 +1,9 @@
 import { atom } from "jotai";
 import { atomFamily } from "jotai/utils";
 import { atomEffect, withAtomEffect } from "jotai-effect";
-import type { InitEffect, PluginModel } from "jotai-table";
+import type { TableInitEffect, TablePluginModel } from "jotai-table";
 
-export class DetailsPluginModel<Data> implements PluginModel<Data> {
+export class DetailsPluginModel<Data> implements TablePluginModel<Data> {
   private readonly $isAllCollapsed = atom(true);
 
   private readonly detailsFamily = atomFamily((id: string) => {
@@ -37,7 +37,7 @@ export class DetailsPluginModel<Data> implements PluginModel<Data> {
     });
   }
 
-  init(): InitEffect {
+  init(): TableInitEffect {
     return atomEffect(() => {});
   }
 }

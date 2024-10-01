@@ -2,25 +2,25 @@ import { type Atom, atom, type PrimitiveAtom } from "jotai";
 import { atomEffect } from "jotai-effect";
 
 import type {
-  Column,
-  DataMap,
-  Plugin,
-  PluginModel,
-  Row,
   TableApi,
+  TableColumn,
+  TableDataMap,
+  TablePlugin,
+  TablePluginModel,
+  TableRow,
 } from "./types.ts";
 
 export class TableModel<Data> {
-  private readonly plugins: Plugin<Data, PluginModel<Data>>[] = [];
+  private readonly plugins: TablePlugin<Data, TablePluginModel<Data>>[] = [];
 
   constructor(
     private readonly options: {
-      columns: Column<Data>[];
+      columns: TableColumn<Data>[];
       getRowId: (item: Data) => string;
     },
   ) {}
 
-  private createRows($data: PrimitiveAtom<Data[]>): Atom<Row<Data>[]> {
+  private createRows($data: PrimitiveAtom<Data[]>): Atom<TableRow<Data>[]> {
     return atom((get) =>
       get($data).map((item) => ({
         id: this.options.getRowId(item),
@@ -29,9 +29,9 @@ export class TableModel<Data> {
     );
   }
 
-  private createDataMap($rows: Atom<Row<Data>[]>) {
+  private createDataMap($rows: Atom<TableRow<Data>[]>) {
     return atom((get) => {
-      return get($rows).reduce<DataMap<Data>>((map, row) => {
+      return get($rows).reduce<TableDataMap<Data>>((map, row) => {
         map.set(row.id, row.$data);
 
         return map;
@@ -40,7 +40,7 @@ export class TableModel<Data> {
   }
 
   private readonly $data = atom<Data[]>([]);
-  private api: TableApi<Data, PluginModel<Data>> | null = null;
+  private api: TableApi<Data, TablePluginModel<Data>> | null = null;
 
   private isInited = false;
 
@@ -99,7 +99,7 @@ export class TableModel<Data> {
     return this.plugins;
   }
 
-  with(plugin: Plugin<Data, PluginModel<Data>>) {
+  with(plugin: TablePlugin<Data, TablePluginModel<Data>>) {
     this.plugins.push(plugin);
 
     return this;

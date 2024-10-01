@@ -1,19 +1,19 @@
 import type { Atom, PrimitiveAtom } from "jotai/index";
 import type { ReactElement, ReactNode } from "react";
 
-export type TableApi<Data, Model extends PluginModel<Data>> = {
+export type TableApi<Data, Model extends TablePluginModel<Data>> = {
   initEffect: Atom<void>;
-  $rows: Atom<Row<Data>[]>;
+  $rows: Atom<TableRow<Data>[]>;
   $data: PrimitiveAtom<Data[]>;
-  $dataMap: Atom<DataMap<Data>>;
+  $dataMap: Atom<TableDataMap<Data>>;
   $columns: ColumnsAtom<Data>;
-  plugins: Plugin<Data, Model>[];
+  plugins: TablePlugin<Data, Model>[];
 };
-export type Row<Data> = {
+export type TableRow<Data> = {
   id: string;
   $data: PrimitiveAtom<Data>;
 };
-export type Column<Data> =
+export type TableColumn<Data> =
   | {
       id: string;
       header: () => ReactNode;
@@ -24,45 +24,48 @@ export type Column<Data> =
       id: string;
       _libType: symbol;
     };
-export type ColumnsAtom<Data> = PrimitiveAtom<Column<Data>[]>;
-export type Plugin<Data, Model extends PluginModel<Data>> = {
+export type ColumnsAtom<Data> = PrimitiveAtom<TableColumn<Data>[]>;
+export type TablePlugin<Data, Model extends TablePluginModel<Data>> = {
   model: Model;
-  view: PluginView<Data, Model>;
+  view: TablePluginView<Data, Model>;
 };
 
-export interface PluginModel<Data> {
-  init(options: InitOptions<Data>): InitEffect;
+export interface TablePluginModel<Data> {
+  init(options: TableInitOptions<Data>): TableInitEffect;
 }
 
-export type InitEffect = Atom<void>;
-export type DataMapAtom<Data> = Atom<DataMap<Data>>;
-export type DataMap<Data> = Map<string, Atom<Data>>;
-export type PluginView<Data, Model extends PluginModel<Data>> = {
-  init(options: PluginApi<Data, Model>): InitEffect;
+export type TableInitEffect = Atom<void>;
+export type TableDataMapAtom<Data> = Atom<TableDataMap<Data>>;
+export type TableDataMap<Data> = Map<string, Atom<Data>>;
+export type TablePluginView<Data, Model extends TablePluginModel<Data>> = {
+  init(options: TablePluginApi<Data, Model>): TableInitEffect;
 
   renderCell?: (
-    api: PluginApi<Data, Model> & {
-      column: Column<Data>;
-      row: Row<Data>;
+    api: TablePluginApi<Data, Model> & {
+      column: TableColumn<Data>;
+      row: TableRow<Data>;
       node: ReactElement;
     },
   ) => ReactElement;
 
   renderRow?: (
-    api: PluginApi<Data, Model> & { row: Row<Data>; node: ReactElement },
+    api: TablePluginApi<Data, Model> & {
+      row: TableRow<Data>;
+      node: ReactElement;
+    },
   ) => ReactElement;
 
-  renderTool?: (api: PluginApi<Data, Model>) => {
+  renderTool?: (api: TablePluginApi<Data, Model>) => {
     left?: ReactElement;
     right?: ReactElement;
   };
 };
-export type PluginApi<
+export type TablePluginApi<
   Data,
-  Model extends PluginModel<Data>,
-> = InitOptions<Data> & { model: Model };
-export type InitOptions<Data> = {
-  $rows: Atom<Row<Data>[]>;
+  Model extends TablePluginModel<Data>,
+> = TableInitOptions<Data> & { model: Model };
+export type TableInitOptions<Data> = {
+  $rows: Atom<TableRow<Data>[]>;
   $columns: ColumnsAtom<Data>;
-  $dataMap: DataMapAtom<Data>;
+  $dataMap: TableDataMapAtom<Data>;
 };
