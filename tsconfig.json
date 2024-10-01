@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "jotai-table": ["./src/index.ts"],
+      "jotai-table/plugins/*": ["./src/plugins/*/index.ts"]
     },
   },
   "include": [
