@@ -34,7 +34,8 @@
   "keywords": [
     "jotai",
     "jotai-table",
-    "react"],
+    "react"
+  ],
   "author": "khmilevoi",
   "license": "MIT",
   "bugs": {
@@ -45,6 +46,7 @@
     "jotai-effect": "^1.0.3"
   },
   "devDependencies": {
+    "rollup-plugin-swc3": "^0.11.2",
     "@eslint/js": "^9.11.1",
     "@rollup/plugin-swc": "^0.4.0",
     "@swc/core": "^1.7.26",

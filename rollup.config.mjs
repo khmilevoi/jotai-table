@@ -1,5 +1,5 @@
-import swc from "@rollup/plugin-swc";
 import { dts } from "rollup-plugin-dts";
+import { swc } from "rollup-plugin-swc3";
 
 export default [
   {
