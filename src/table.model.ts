@@ -99,8 +99,10 @@ export class TableModel<Data> {
     return this.plugins;
   }
 
-  with(plugin: TablePlugin<Data, TablePluginModel<Data>>) {
-    this.plugins.push(plugin);
+  with<Model extends TablePluginModel<Data>>(plugin: TablePlugin<Data, Model>) {
+    this.plugins.push(
+      plugin as unknown as TablePlugin<Data, TablePluginModel<Data>>,
+    );
 
     return this;
   }

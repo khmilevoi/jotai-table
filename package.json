@@ -1,6 +1,6 @@
 {
   "name": "jotai-table",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Table component using jotai",
   "private": false,
   "types": "./dist/index.d.ts",
@@ -15,7 +15,7 @@
         "default": "./dist/index.js"
       }
     },
-    "./*": {
+    "./plugins/*": {
       "import": {
         "types": "./dist/plugins/*/index.d.ts",
         "default": "./dist/plugins/*/index.mjs"
