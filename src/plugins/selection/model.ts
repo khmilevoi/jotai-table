@@ -12,7 +12,7 @@ export class SelectionPluginModel<Data> implements TablePluginModel<Data> {
   constructor(
     private readonly options: {
       getIsActive: (item: Data) => PrimitiveAtom<boolean>;
-      $status: StatusAtom;
+      $status: SelectionStatusAtom;
       $activeItems: PrimitiveAtom<Data[]>;
     },
   ) {}
@@ -122,5 +122,9 @@ export class SelectionPluginModel<Data> implements TablePluginModel<Data> {
   }
 }
 
-export type StatusAtom = WritableAtom<Status, [Status], void>;
-export type Status = "inactive" | "active" | "partial";
+export type SelectionStatusAtom = WritableAtom<
+  SelectionStatus,
+  [SelectionStatus],
+  void
+>;
+export type SelectionStatus = "inactive" | "active" | "partial";

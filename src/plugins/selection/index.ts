@@ -1,7 +1,7 @@
 import type { PrimitiveAtom } from "jotai";
 
 import type { TableColumn, TablePlugin } from "../../types.ts";
-import { SelectionPluginModel, type StatusAtom } from "./model";
+import { SelectionPluginModel, type SelectionStatusAtom } from "./model";
 import { SelectionColumnSymbol, SelectionPluginView } from "./ui";
 
 export const SelectionPlugin = <Data>({
@@ -10,7 +10,7 @@ export const SelectionPlugin = <Data>({
   getIsActive,
 }: {
   getIsActive: (item: Data) => PrimitiveAtom<boolean>;
-  $status: StatusAtom;
+  $status: SelectionStatusAtom;
   $activeItems: PrimitiveAtom<Data[]>;
 }): TablePlugin<Data, SelectionPluginModel<Data>> => {
   return {
@@ -25,3 +25,5 @@ SelectionPlugin.createColumn = <Data>(): TableColumn<Data> => {
     _libType: SelectionColumnSymbol,
   };
 };
+
+export type { SelectionStatus } from "./model.ts";
