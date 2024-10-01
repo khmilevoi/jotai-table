@@ -46,5 +46,9 @@ export const App = () => {
 
   const users = useAtomValue($users);
 
-  return <Table model={tableModel} data={users} />;
+  return (
+    <div style={{ width: "300px" }}>
+      <Table model={tableModel} data={users} />
+    </div>
+  );
 };

@@ -45,7 +45,7 @@ export const Table = <Data,>({ model, data: source }: TableProps<Data>) => {
 
   return (
     <TableContext.Provider value={contextValue}>
-      <div>
+      <div style={{ display: "flex", flexDirection: "column" }}>
         <Tools />
         <table>
           <Thead />

@@ -34,8 +34,6 @@ let counter = 0;
 export const getUsersEffect = queryAtom<UserDto[]>(async () => {
   const name = (++counter).toString().slice(-5);
 
-  console.log(name);
-
   mock.push({
     name: name,
     email: `${name}@email.com`,
