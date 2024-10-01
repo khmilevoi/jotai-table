@@ -1,6 +1,6 @@
 import { atomEffect } from "jotai-effect";
-import type { TableColumn, TablePlugin, TablePluginModel } from "jotai-table";
-import { TableModel } from "jotai-table";
+import type { TableColumn, TablePlugin, TablePluginModel } from "src";
+import { TableModel } from "src";
 import { beforeEach, describe, expect, it } from "vitest";
 
 interface TestData {

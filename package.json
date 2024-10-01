@@ -1,6 +1,6 @@
 {
   "name": "jotai-table",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Table component using jotai",
   "private": false,
   "types": "./dist/index.d.ts",
