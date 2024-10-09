@@ -1,6 +1,5 @@
-import { useAtomValue } from "jotai";
 import { useQueryAtom } from "jotai-async/react";
-import { Table, TableModel } from "jotai-table";
+import { JotaiTable, JotaiTableModel } from "jotai-table";
 import { DetailsPlugin } from "jotai-table/plugins/details";
 import { SelectionPlugin } from "jotai-table/plugins/selection";
 
@@ -12,7 +11,7 @@ import {
   type User,
 } from "./model";
 
-const tableModel = new TableModel<User>({
+const tableModel = new JotaiTableModel<User>({
   columns: [
     SelectionPlugin.createColumn(),
     {
@@ -44,11 +43,9 @@ const tableModel = new TableModel<User>({
 export const App = () => {
   useQueryAtom(getUsersEffect);
 
-  const users = useAtomValue($users);
-
   return (
     <div style={{ width: "300px" }}>
-      <Table model={tableModel} data={users} />
+      <JotaiTable model={tableModel} $data={$users} />
     </div>
   );
 };

@@ -1,21 +1,33 @@
-import { atom } from "jotai";
-import { atomFamily } from "jotai/utils";
-import { atomEffect, withAtomEffect } from "jotai-effect";
-import type { TableInitEffect, TablePluginModel } from "jotai-table";
+import {
+  TableInitEffect,
+  TableInitOptions,
+  TablePluginModel,
+} from '@jotai-table';
+import { atom } from 'jotai';
+import { atomFamily } from 'jotai/utils';
+import { atomEffect, withAtomEffect } from 'jotai-effect';
 
-export class DetailsPluginModel<Data> implements TablePluginModel<Data> {
-  private readonly $isAllCollapsed = atom(true);
+export class DetailsPluginModel<Data> extends TablePluginModel<Data> {
+  private readonly $isAllCollapsed;
 
-  private readonly detailsFamily = atomFamily((id: string) => {
-    const $isCollapsed = atom(true);
-    $isCollapsed.debugLabel = `details.${id}`;
+  private readonly detailsFamily;
 
-    return withAtomEffect($isCollapsed, (get, set) => {
-      const isAllCollapsed = get(this.$isAllCollapsed);
+  constructor(initOptions: TableInitOptions<Data>) {
+    super(initOptions);
 
-      set($isCollapsed, isAllCollapsed);
+    this.$isAllCollapsed = atom(true);
+
+    this.detailsFamily = atomFamily((id: string) => {
+      const $isCollapsed = atom(true);
+      $isCollapsed.debugLabel = `details.${id}`;
+
+      return withAtomEffect($isCollapsed, (get, set) => {
+        const isAllCollapsed = get(this.$isAllCollapsed);
+
+        set($isCollapsed, isAllCollapsed);
+      });
     });
-  });
+  }
 
   getIsAllCollapsed() {
     return this.$isAllCollapsed;
@@ -31,7 +43,7 @@ export class DetailsPluginModel<Data> implements TablePluginModel<Data> {
     });
   }
 
-  show() {
+  uncollapse() {
     return atom(null, (_, set) => {
       set(this.$isAllCollapsed, false);
     });

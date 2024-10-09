@@ -1,71 +1,124 @@
-import type { Atom, PrimitiveAtom } from "jotai/index";
-import type { ReactElement, ReactNode } from "react";
+import type { Atom, PrimitiveAtom } from 'jotai';
+import type { FunctionComponent, ReactElement, ReactNode } from 'react';
 
 export type TableApi<Data, Model extends TablePluginModel<Data>> = {
   initEffect: Atom<void>;
-  $rows: Atom<TableRow<Data>[]>;
-  $data: PrimitiveAtom<Data[]>;
+  $rows: RowsAtom<Data>;
+  $data: Atom<Data[]>;
   $dataMap: Atom<TableDataMap<Data>>;
   $columns: ColumnsAtom<Data>;
-  plugins: TablePlugin<Data, Model>[];
-};
-export type TableRow<Data> = {
-  id: string;
-  $data: PrimitiveAtom<Data>;
-};
-export type TableColumn<Data> =
-  | {
-      id: string;
-      header: () => ReactNode;
-      cell: (data: Data, id: string) => ReactNode;
-      _libType?: never;
-    }
-  | {
-      id: string;
-      _libType: symbol;
-    };
-export type ColumnsAtom<Data> = PrimitiveAtom<TableColumn<Data>[]>;
-export type TablePlugin<Data, Model extends TablePluginModel<Data>> = {
-  model: Model;
-  view: TablePluginView<Data, Model>;
+  plugins: {
+    model: Model;
+    view: TablePluginView<Data, Model>;
+  }[];
+  tools: TableTools<Data>;
 };
 
-export interface TablePluginModel<Data> {
-  init(options: TableInitOptions<Data>): TableInitEffect;
-}
+export type TableTools<Data> = {
+  left: TablePluginToolsList<Data>;
+  right: TablePluginToolsList<Data>;
+};
 
-export type TableInitEffect = Atom<void>;
-export type TableDataMapAtom<Data> = Atom<TableDataMap<Data>>;
-export type TableDataMap<Data> = Map<string, Atom<Data>>;
+export type TablePluginToolsList<Data> = (
+  | TablePluginTool
+  | JotaiTableTool<Data>
+)[];
+
 export type TablePluginView<Data, Model extends TablePluginModel<Data>> = {
-  init(options: TablePluginApi<Data, Model>): TableInitEffect;
+  init?: (options: TablePluginApi<Data, Model>) => TableInitEffect;
+
+  initColumns?: (api: TablePluginApi<Data, Model>) => {
+    [ColumnId: symbol]: TableUserColumn<Data>;
+  };
 
   renderCell?: (
-    api: TablePluginApi<Data, Model> & {
-      column: TableColumn<Data>;
-      row: TableRow<Data>;
+    api: TablePluginViewApi<Data, Model> & {
+      column: JotaiTableColumn<Data>;
+      row: JotaiTableRow<Data>;
       node: ReactElement;
     },
   ) => ReactElement;
 
   renderRow?: (
-    api: TablePluginApi<Data, Model> & {
-      row: TableRow<Data>;
+    api: TablePluginViewApi<Data, Model> & {
+      row: JotaiTableRow<Data>;
       node: ReactElement;
     },
   ) => ReactElement;
 
-  renderTool?: (api: TablePluginApi<Data, Model>) => {
-    left?: ReactElement;
-    right?: ReactElement;
+  renderTools?: (api: TablePluginViewApi<Data, Model>) => {
+    [ToolId: symbol]: FunctionComponent;
   };
 };
+
 export type TablePluginApi<
   Data,
   Model extends TablePluginModel<Data>,
 > = TableInitOptions<Data> & { model: Model };
+
 export type TableInitOptions<Data> = {
-  $rows: Atom<TableRow<Data>[]>;
-  $columns: ColumnsAtom<Data>;
+  $rows: RowsAtom<Data>;
   $dataMap: TableDataMapAtom<Data>;
+};
+
+export type TablePlugin<Data, Model extends TablePluginModel<Data>> = {
+  model: (initOptions: TableInitOptions<Data>) => Model;
+  view: TablePluginView<Data, Model>;
+};
+
+export type TablePluginViewApi<
+  Data,
+  Model extends TablePluginModel<Data>,
+> = TablePluginApi<Data, Model> & {
+  $columns: ColumnsAtom<Data>;
+};
+
+export abstract class TablePluginModel<Data> {
+  protected readonly $dataMap: TableDataMapAtom<Data>;
+  protected readonly $rows: RowsAtom<Data>;
+
+  protected constructor({ $dataMap, $rows }: TableInitOptions<Data>) {
+    this.$dataMap = $dataMap;
+    this.$rows = $rows;
+  }
+
+  abstract init(): TableInitEffect;
+}
+
+export type JotaiTableTool<Data> = FunctionComponent<
+  Omit<TablePluginViewApi<Data, never>, 'model'>
+>;
+
+export type TableInitEffect = Atom<void>;
+
+export type ColumnsAtom<Data> = PrimitiveAtom<TableUserColumn<Data>[]>;
+
+export type RowsAtom<Data> = Atom<JotaiTableRow<Data>[]>;
+
+export type TableDataMapAtom<Data> = Atom<TableDataMap<Data>>;
+
+export type TableDataMap<Data> = Map<string, Data>;
+
+export type JotaiTableRow<Data> = {
+  id: string;
+  data: Data;
+};
+
+export type JotaiTableColumn<Data> = TableUserColumn<Data> | TablePluginColumn;
+
+export type TableUserColumn<Data> = {
+  id: string;
+  header: () => ReactNode;
+  cell: (data: Data, id: string) => ReactNode;
+  _libType?: never;
+};
+
+export type TablePluginColumn = {
+  id: string;
+  _libType: symbol;
+};
+
+export type TablePluginTool = {
+  id: string;
+  _libId: symbol;
 };

@@ -1,52 +1,78 @@
-import type { PrimitiveAtom, WritableAtom } from "jotai";
-import { atom } from "jotai";
-import { atomEffect } from "jotai-effect";
-
-import type {
+import {
   TableInitEffect,
   TableInitOptions,
   TablePluginModel,
-} from "../../types.ts";
+} from '@jotai-table';
+import type { Atom } from 'jotai';
+import { atom } from 'jotai';
+import { atomEffect } from 'jotai-effect';
 
-export class SelectionPluginModel<Data> implements TablePluginModel<Data> {
+import { SelectionModelOptions } from './types';
+
+export class SelectionPluginModel<Data> extends TablePluginModel<Data> {
+  private readonly $isSelected: Atom<boolean>;
+  private readonly $activeItemsSet;
+
   constructor(
-    private readonly options: {
-      getIsActive: (item: Data) => PrimitiveAtom<boolean>;
-      $status: SelectionStatusAtom;
-      $activeItems: PrimitiveAtom<Data[]>;
-    },
-  ) {}
+    private readonly pluginOptions: SelectionModelOptions<Data>,
+    options: TableInitOptions<Data>,
+  ) {
+    super(options);
+
+    this.$isSelected = atom(
+      (get) => get(pluginOptions.$activeItems).length > 0,
+    );
+    this.$activeItemsSet = atom(new Set<string>());
+  }
 
   getStatus() {
-    return this.options.$status;
+    return this.pluginOptions.$status;
+  }
+
+  getIsSelected() {
+    return this.$isSelected;
   }
 
   setStatus() {
     return atom(null, (_, set, nextStatus: boolean) => {
-      set(this.options.$status, nextStatus ? "active" : "inactive");
+      set(this.pluginOptions.$status, nextStatus ? 'active' : 'inactive');
     });
   }
 
-  getActiveItems() {
-    return this.options.$activeItems;
+  getIsActive(data: Data) {
+    return this.pluginOptions.getIsActive(data);
   }
 
-  init({ $rows, $dataMap }: TableInitOptions<Data>): TableInitEffect {
-    const $activeItemsSet = atom(new Set<string>());
+  getActiveItems() {
+    return this.pluginOptions.$activeItems;
+  }
 
-    const mainEffect = atomEffect((get, set) => {
-      const rows = get($rows);
+  init(): TableInitEffect {
+    const mainEffect = this.createMainEffect();
+    const activeItemsEffect = this.createActiveItemsEffect();
+    const statusEffect = this.createStatusEffect();
+    const updateStatusEffect = this.createUpdateStatusEffect();
+
+    return atomEffect((get) => {
+      get(mainEffect);
+      get(statusEffect);
+      get(activeItemsEffect);
+      get(updateStatusEffect);
+    });
+  }
+
+  private createMainEffect() {
+    return atomEffect((get, set) => {
+      const rows = get(this.$rows);
 
       rows.forEach((row) => {
-        const data = get.peek(row.$data);
-
-        const $isActive = this.options.getIsActive(data);
+        const $isActive = this.pluginOptions.getIsActive(row.data);
 
         get(
           atomEffect((get, set) => {
             const isActive = get($isActive);
 
-            const activeItemsSet = get.peek($activeItemsSet);
+            const activeItemsSet = get.peek(this.$activeItemsSet);
 
             if (isActive) {
               activeItemsSet.add(row.id);
@@ -54,14 +80,14 @@ export class SelectionPluginModel<Data> implements TablePluginModel<Data> {
               activeItemsSet.delete(row.id);
             }
 
-            set($activeItemsSet, new Set(activeItemsSet));
+            set(this.$activeItemsSet, new Set(activeItemsSet));
           }),
         );
       });
 
       return () => {
-        const nextRows = get($rows);
-        const activeItems = get.peek($activeItemsSet);
+        const nextRows = get(this.$rows);
+        const activeItems = get.peek(this.$activeItemsSet);
 
         const oldIds = new Set(activeItems.keys());
 
@@ -73,58 +99,50 @@ export class SelectionPluginModel<Data> implements TablePluginModel<Data> {
           activeItems.delete(expiredKey);
         });
 
-        set($activeItemsSet, new Set(activeItems));
+        set(this.$activeItemsSet, new Set(activeItems));
       };
     });
+  }
 
-    const activeItemsEffect = atomEffect((get, set) => {
-      const activeItemsSet = get($activeItemsSet);
-      const dataMap = get.peek($dataMap);
+  private createActiveItemsEffect() {
+    return atomEffect((get, set) => {
+      const activeItemsSet = get(this.$activeItemsSet);
+      const dataMap = get.peek(this.$dataMap);
 
       set(
-        this.options.$activeItems,
-        [...activeItemsSet].map((id) => get.peek(dataMap.get(id)!)),
+        this.pluginOptions.$activeItems,
+        [...activeItemsSet].map((id) => dataMap.get(id)!),
       );
     });
+  }
 
-    const statusEffect = atomEffect((get, set) => {
-      const activeItemsSet = get($activeItemsSet);
-      const rows = get.peek($rows);
+  private createStatusEffect() {
+    return atomEffect((get, set) => {
+      const activeItemsSet = get(this.$activeItemsSet);
+      const rows = get.peek(this.$rows);
 
       if (rows.length === activeItemsSet.size) {
-        set(this.options.$status, "active");
+        set(this.pluginOptions.$status, 'active');
       } else if (activeItemsSet.size === 0) {
-        set(this.options.$status, "inactive");
+        set(this.pluginOptions.$status, 'inactive');
       } else {
-        set(this.options.$status, "partial");
+        set(this.pluginOptions.$status, 'partial');
       }
     });
+  }
 
-    const updateStatusEffect = atomEffect((get, set) => {
-      const status = get(this.options.$status);
-      const rows = get.peek($rows);
+  private createUpdateStatusEffect() {
+    return atomEffect((get, set) => {
+      const status = get(this.pluginOptions.$status);
+      const rows = get.peek(this.$rows);
 
-      if (status === "partial") {
+      if (status === 'partial') {
         return;
       }
 
       rows.forEach((row) =>
-        set(this.options.getIsActive(get.peek(row.$data)), status === "active"),
+        set(this.pluginOptions.getIsActive(row.data), status === 'active'),
       );
-    });
-
-    return atomEffect((get) => {
-      get(mainEffect);
-      get(statusEffect);
-      get(activeItemsEffect);
-      get(updateStatusEffect);
     });
   }
 }
-
-export type SelectionStatusAtom = WritableAtom<
-  SelectionStatus,
-  [SelectionStatus],
-  void
->;
-export type SelectionStatus = "inactive" | "active" | "partial";
